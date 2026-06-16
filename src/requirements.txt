@@ -1,0 +1,11 @@
+# Dependencies for requirements
+openai
+ipython
+pandas
+pymupdf
+requests
+playwright
+llama-index
+llama-index-llms-fireworks
+pydantic 
+
