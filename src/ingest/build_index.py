@@ -6,13 +6,27 @@ the metadata from the VectorStoreIndex.
 - Build the index from the documents
 - then persist the index
 """
-from src.config import ABSOLUTE_DATA_DIR_PATH, configure_settings
+from src.config import (
+    ABSOLUTE_DATA_DIR_PATH,
+    ABSOLUTE_VECTOR_STORE_PATH,
+    configure_settings,
+)
+import argparse
 import json
-from llama_index.core import Document, VectorStoreIndex
+import logging
+from typing import cast
+from llama_index.core import (
+    Document,
+    StorageContext,
+    VectorStoreIndex,
+    load_index_from_storage,
+)
 from llama_index.core.node_parser import SentenceSplitter
 import pymupdf
 from pathlib import Path
 import re
+
+logger = logging.getLogger(__name__)
 
 class IndexBuilder:
 
@@ -76,11 +90,30 @@ class IndexBuilder:
             transformations=[splitter]
         )
     
-    def run(self) -> VectorStoreIndex:
+    # load existing store if it is already there, otherwise build and persist it
+    def run(self, force: bool = False) -> VectorStoreIndex:
         configure_settings()
+        if ABSOLUTE_VECTOR_STORE_PATH.exists() and not force:
+            logger.info(f"Vector store already exists at {ABSOLUTE_VECTOR_STORE_PATH}, loading it")
+            storage_context = StorageContext.from_defaults(persist_dir=str(ABSOLUTE_VECTOR_STORE_PATH))
+            return cast(VectorStoreIndex, load_index_from_storage(storage_context))
+
         documents = self.load_documents()
-        return self.build_index(documents)
+        index = self.build_index(documents)
+        # persist so pdf.py can load it later
+        index.storage_context.persist(persist_dir=str(ABSOLUTE_VECTOR_STORE_PATH))
+        logger.info("Persisted vector store to %s", ABSOLUTE_VECTOR_STORE_PATH)
+        return index
+
 
 if __name__ == "__main__":
-    IndexBuilder().run()
+    logging.basicConfig(level=logging.INFO, format="%(levelname)s %(message)s")
+    parser = argparse.ArgumentParser(description="Build the PDF vector store index.")
+    parser.add_argument(
+        "--force",
+        action="store_true",
+        help="Rebuild and overwrite the index even if one already exists.",
+    )
+    args = parser.parse_args()
+    IndexBuilder().run(force=args.force)
 
