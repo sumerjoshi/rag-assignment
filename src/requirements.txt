@@ -7,5 +7,10 @@ requests
 playwright
 llama-index
 llama-index-llms-fireworks
-pydantic 
+llama-index-llms-openai-like
+llama-index-embeddings-openai-like
+pydantic
+python-dotenv
+pytest
+mypy
 
