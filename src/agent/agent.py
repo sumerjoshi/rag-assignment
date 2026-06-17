@@ -33,7 +33,11 @@ def _make_tools(evidence: list[Evidence]) -> list[BaseTool | Callable[..., Any]]
         """Numeric financials that are structured: revenue, net income, segments, balance sheet."""
         resp = build_sql_query_engine().query(question)
         # resp.metadata holds the executed sql + rows; convert handles tuple->dict + None
-        evidence.append(convert_to_sql_evidence(resp.metadata or {}))
+        ev = convert_to_sql_evidence(resp.metadata or {})
+        # only record evidence when the query returned rows; empty/failed attempts
+        # (e.g. a wrong segment name) are not evidence and just clutter the output
+        if ev.rows:
+            evidence.append(ev)
         return str(resp)
 
     def search_filings(question: str) -> str:

@@ -53,14 +53,13 @@ def test_pdf_tool_collects_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
     assert evidence == [item]
 
 
-def test_sql_tool_handles_empty_metadata(monkeypatch: pytest.MonkeyPatch) -> None:
-    # no metadata should not crash, just produce empty evidence
+def test_sql_tool_skips_evidence_when_no_rows(monkeypatch: pytest.MonkeyPatch) -> None:
+    # a query that returns nothing (e.g. wrong segment name) is a failed attempt,
+    # not evidence, so it should not be recorded
     monkeypatch.setattr(agent_module, "build_sql_query_engine", lambda: _FakeEngine(None))
     evidence: list[Evidence] = []
     _tool(agent_module._make_tools(evidence), "query_financials").call(question="x")
-    assert isinstance(evidence[0], SQLEvidence)
-    assert evidence[0].rows == []
-    assert evidence[0].query == ""
+    assert evidence == []
 
 
 def test_pdf_tool_no_hits_collects_nothing(monkeypatch: pytest.MonkeyPatch) -> None:
