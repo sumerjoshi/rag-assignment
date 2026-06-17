@@ -1,6 +1,8 @@
 
+from typing import Any
 from sqlalchemy import create_engine
 from src.config import ABSOLUTE_DB_PATH
+from src.models import SQLEvidence
 from llama_index.core import SQLDatabase
 from llama_index.core.query_engine import NLSQLTableQueryEngine
 
@@ -62,5 +64,12 @@ def build_sql_query_engine() -> NLSQLTableQueryEngine:
     """Reading the SQL Database as NLSQLTableQueryEngine so we can run Text-to-SQL over it"""
     engine = create_engine(f"sqlite:///file:{ABSOLUTE_DB_PATH}?mode=ro&uri=true")
     sql_db = SQLDatabase(engine, include_tables=TABLES)
-    return NLSQLTableQueryEngine(sql_database=sql_db, context_str_prefix=CONTEXT_SCHEMA_STR) 
+    return NLSQLTableQueryEngine(sql_database=sql_db, context_str_prefix=CONTEXT_SCHEMA_STR)
+
+
+# the engine returns rows as tuples plus the column names, zip them into dicts for SQLEvidence
+def convert_to_sql_evidence(metadata: dict[str, Any]) -> SQLEvidence:
+    col_keys = metadata.get("col_keys") or []
+    rows = [dict(zip(col_keys, row)) for row in metadata.get("result") or []]
+    return SQLEvidence(query=metadata.get("sql_query", ""), rows=rows)
 

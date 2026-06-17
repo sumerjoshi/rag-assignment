@@ -32,6 +32,6 @@ Evidence = Annotated[SQLEvidence | PDFEvidence, Field(discriminator="source")]
 
 class AgentResponse(BaseModel):
     answer: str 
-    sources_used: Literal["sql", "pdf"]
+    sources_used: list[Literal["sql", "pdf"]]
     evidence: list[Evidence]
 
