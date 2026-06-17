@@ -15,28 +15,26 @@ def _require(name: str) -> str:
     return my_val
 
 
-# Define variables and make sure that have been set
-FW_MODEL = _require("FIREWORKS_LLM_MODEL")
-FW_API_KEY = _require("FIREWORKS_API_KEY")
-FW_API_BASE = _require("FIREWORKS_BASE_URL")
-FW_EMBED_MODEL = _require("FIREWORKS_EMBEDDING_MODEL")
-DATABASE_PATH = _require("DATABASE_PATH")
-PDF_DIR = _require("PDF_DIR")
+# Paths are not secrets, so default them instead of failing the import.
+# importing this module should never crash just because the env is incomplete.
+DATABASE_PATH = os.getenv("DATABASE_PATH", "data/financials.db")
+PDF_DIR = os.getenv("PDF_DIR", "data/pdfs")
+VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "storage")
 
 # Set the _REPO_ROOT and other variables coming from SRC
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 ABSOLUTE_DB_PATH = (_REPO_ROOT / DATABASE_PATH).resolve()
 ABSOLUTE_PDF_DIR_PATH = (_REPO_ROOT / PDF_DIR).resolve()
-VECTOR_STORE_DIR=os.getenv("VECTOR_STORE_DIR")
 
 def get_llm() -> OpenAILike:
     """
     Returns the Chat LLM as an OpenAILike object to be used everywhere
     """
+    # validate the secrets here, at the point we actually need them
     llm = OpenAILike(
-        model=FW_MODEL,
-        api_key=FW_API_KEY,
-        api_base=FW_API_BASE,
+        model=_require("FIREWORKS_LLM_MODEL"),
+        api_key=_require("FIREWORKS_API_KEY"),
+        api_base=_require("FIREWORKS_BASE_URL"),
         is_chat_model=True,
         is_function_calling_model=True
     )
@@ -47,9 +45,9 @@ def get_embed_model() -> OpenAILikeEmbedding:
     Returns the Embedding Model as OpenAILikeObject to be used everywhere
     """
     embedding_model = OpenAILikeEmbedding(
-        model_name=FW_EMBED_MODEL,
-        api_key=FW_API_KEY,
-        api_base=FW_API_BASE,
+        model_name=_require("FIREWORKS_EMBEDDING_MODEL"),
+        api_key=_require("FIREWORKS_API_KEY"),
+        api_base=_require("FIREWORKS_BASE_URL"),
     )
     return embedding_model
 
