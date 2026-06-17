@@ -4,10 +4,12 @@ from sqlalchemy.exc import OperationalError
 
 import src.config as config
 from src.config import ABSOLUTE_DB_PATH
+from src.models import SQLEvidence
 from src.retrieval.sql import (
     CONTEXT_SCHEMA_STR,
     TABLES,
     build_sql_query_engine,
+    convert_to_sql_evidence,
 )
 
 
@@ -32,3 +34,23 @@ def test_engine_connection_is_read_only() -> None:
     with pytest.raises(OperationalError):
         with engine.connect() as conn:
             conn.execute(text("CREATE TABLE should_not_work (id INTEGER)"))
+
+
+def test_convert_to_sql_evidence_zips_rows_into_dicts() -> None:
+    # shape comes from the real engine: result is tuples, col_keys are the columns
+    meta = {
+        "sql_query": "SELECT revenue FROM income_statements WHERE company_ticker = 'AAPL'",
+        "result": [(416161000000,)],
+        "col_keys": ["revenue"],
+    }
+    ev = convert_to_sql_evidence(meta)
+    assert isinstance(ev, SQLEvidence)
+    assert ev.source == "sql"
+    assert ev.query == meta["sql_query"]
+    assert ev.rows == [{"revenue": 416161000000}]
+
+
+def test_convert_to_sql_evidence_handles_empty_result() -> None:
+    # a query with no rows should give empty evidence, not crash
+    ev = convert_to_sql_evidence({"sql_query": "SELECT 1 WHERE 0", "result": [], "col_keys": []})
+    assert ev.rows == []

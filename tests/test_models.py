@@ -15,7 +15,7 @@ def test_agent_response_discriminates_evidence_union() -> None:
     resp = AgentResponse.model_validate(
         {
             "answer": "ok",
-            "sources_used": "pdf",
+            "sources_used": ["pdf"],
             "evidence": [
                 {"source": "sql", "query": "SELECT 1", "rows": []},
                 {"source": "pdf", "company_ticker": "AAPL", "chunk_id": "c1", "fiscal_year": 2024, "page_number": 3, "text": "t", "score": 0.5},
@@ -26,15 +26,23 @@ def test_agent_response_discriminates_evidence_union() -> None:
     assert isinstance(resp.evidence[1], PDFEvidence)
 
 
+def test_sources_used_allows_both() -> None:
+    # a question can draw on sql and pdf together
+    resp = AgentResponse.model_validate(
+        {"answer": "ok", "sources_used": ["sql", "pdf"], "evidence": []}
+    )
+    assert resp.sources_used == ["sql", "pdf"]
+
+
 def test_evidence_rejects_unknown_source() -> None:
     # an unrecognized discriminator should fail, not silently pass through
     with pytest.raises(ValidationError):
         AgentResponse.model_validate(
-            {"answer": "x", "sources_used": "pdf", "evidence": [{"source": "csv", "foo": 1}]}
+            {"answer": "x", "sources_used": ["pdf"], "evidence": [{"source": "csv", "foo": 1}]}
         )
 
 
 def test_sources_used_rejects_invalid_value() -> None:
-    # "both" is not allowed by the current Literal["sql", "pdf"]
+    # "both" is not a member of Literal["sql", "pdf"]
     with pytest.raises(ValidationError):
-        AgentResponse.model_validate({"answer": "x", "sources_used": "both", "evidence": []})
+        AgentResponse.model_validate({"answer": "x", "sources_used": ["both"], "evidence": []})

@@ -1,6 +1,6 @@
 
 from typing import cast
-from src.config import ABSOLUTE_VECTOR_STORE_PATH
+from src.config import ABSOLUTE_VECTOR_STORE_PATH, configure_settings
 from llama_index.core import VectorStoreIndex
 from src.ingest.build_index import IndexBuilder
 from llama_index.core import StorageContext, load_index_from_storage
@@ -16,6 +16,9 @@ _index: VectorStoreIndex | None = None
 def _get_index() -> VectorStoreIndex:
     global _index
     if _index is None:
+        # loading (not just querying) needs Settings.embed_model, or it falls back to
+        # OpenAI. the build path sets this, but the existing-index path must too.
+        configure_settings()
         if not ABSOLUTE_VECTOR_STORE_PATH.exists():
             IndexBuilder().run()
         sc = StorageContext.from_defaults(persist_dir=str(ABSOLUTE_VECTOR_STORE_PATH))
