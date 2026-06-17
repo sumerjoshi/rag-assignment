@@ -1,6 +1,7 @@
 import asyncio
 import json
 import logging
+import math
 import re
 from pathlib import Path
 from typing import Any
@@ -16,28 +17,35 @@ _ROOT = Path(__file__).resolve().parents[1]
 WITH_ANSWERS = _ROOT / "questions" / "dev_questions_with_answers.json"
 
 SCALE = {"trillion": 1e12, "billion": 1e9, "million": 1e6, "thousand": 1e3}
-_NUM_RE = re.compile(r"\$?\s*([\d,]+(?:\.\d+)?)\s*(trillion|billion|million|thousand)?", re.IGNORECASE)
+# the sign can appear before or after the $ (e.g. "-5 million", "-$5", "$-5")
+_NUM_RE = re.compile(
+    r"(-?)\s*\$?\s*(-?)\s*([\d,]+(?:\.\d+)?)\s*(trillion|billion|million|thousand)?",
+    re.IGNORECASE,
+)
 
 
 # pull every number-like token out of prose, scaling "billion"/"million" etc.
 def extract_numbers(text: str) -> list[float]:
     numbers: list[float] = []
     for match in _NUM_RE.finditer(text):
-        digits = match.group(1).replace(",", "")
+        digits = match.group(3).replace(",", "")
         if not digits or digits == ".":
             continue
         value = float(digits)
-        scale = match.group(2)
+        if "-" in (match.group(1), match.group(2)):
+            value = -value
+        scale = match.group(4)
         if scale:
             value *= SCALE[scale.lower()]
         numbers.append(value)
     return numbers
 
 
-# numeric answer passes if ANY extracted number is within tolerance of gold.
-# checking all numbers makes this robust to years / other figures in the prose.
-def score_numeric(answer_text: str, gold: float, tol: float = 0.01) -> bool:
-    return any(abs(n - gold) <= tol * abs(gold) for n in extract_numbers(answer_text))
+# numeric answer passes if ANY extracted number is close to gold. checking all numbers
+# makes this robust to years / other figures in the prose. math.isclose uses abs_tol so
+# a gold of 0 is not pathological (relative tolerance alone would require an exact 0).
+def score_numeric(answer_text: str, gold: float, rel_tol: float = 0.01, abs_tol: float = 0.5) -> bool:
+    return any(math.isclose(n, gold, rel_tol=rel_tol, abs_tol=abs_tol) for n in extract_numbers(answer_text))
 
 
 JUDGE_PROMPT = (

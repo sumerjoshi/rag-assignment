@@ -25,6 +25,17 @@ def test_score_numeric_fails_when_value_wrong() -> None:
     assert score_numeric("Revenue was about $99 billion", 416161000000) is False
 
 
+def test_extract_numbers_keeps_negative_sign() -> None:
+    assert -5000000.0 in extract_numbers("a net loss of -5 million")
+    assert -5000000.0 in extract_numbers("-$5 million")
+
+
+def test_score_numeric_handles_zero_gold() -> None:
+    # relative tolerance alone would require an exact 0; abs_tol fixes that
+    assert score_numeric("growth was about 0.001%", 0.0) is True
+    assert score_numeric("revenue was $400 billion", 0.0) is False
+
+
 def test_score_numeric_matches_percentage() -> None:
     assert score_numeric("About 51.3% of revenue came from the US", 51.3) is True
 
@@ -96,3 +107,21 @@ def test_build_answers_produces_id_to_answer_map(monkeypatch: pytest.MonkeyPatch
     questions = [{"id": "q_001", "question": "Q1?"}, {"id": "q_006", "question": "Q2?"}]
     result = asyncio.run(gda.build_answers(questions))
     assert result == {"q_001": "answer to: Q1?", "q_006": "answer to: Q2?"}
+
+
+def test_build_answers_records_error_instead_of_crashing(monkeypatch: pytest.MonkeyPatch) -> None:
+    # a single failing question should not abort the whole run
+    class _Resp:
+        def __init__(self, ans: str) -> None:
+            self.answer = ans
+
+    async def flaky_answer(question: str) -> _Resp:
+        if "boom" in question:
+            raise RuntimeError("api down")
+        return _Resp(f"ok: {question}")
+
+    monkeypatch.setattr(gda, "answer", flaky_answer)
+    questions = [{"id": "q_001", "question": "fine"}, {"id": "q_006", "question": "boom"}]
+    result = asyncio.run(gda.build_answers(questions))
+    assert result["q_001"] == "ok: fine"
+    assert "error" in result["q_006"].lower()
