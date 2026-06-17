@@ -219,12 +219,22 @@ tests/                          test suite (pytest), mypy-clean
 
 ## Setup
 
-1. Run the bootstrap script. It creates a `.venv`, installs `src/requirements.txt`, and
-   builds `data/financials.db` and the six PDFs if they are missing.
+1. Run the bootstrap script. It creates a `.venv`, installs the dependencies from
+   `src/requirements.txt`, and builds `data/financials.db` and the six PDFs if they are
+   missing.
 
 ```bash
 ./setup.sh
 source .venv/bin/activate
+```
+
+   If you would rather set things up by hand, or `setup.sh` cannot reach the SEC source
+   data, the dependency install is the only required step (the data ships with the repo):
+
+```bash
+uv venv
+source .venv/bin/activate
+uv pip install -r src/requirements.txt
 ```
 
 2. Create your environment file and set your Fireworks key.
@@ -324,7 +334,7 @@ rows and the PDF passages.
 
 ```bash
 pytest -v tests/
-mypy src tests
+mypy src eval tests
 ```
 
 The suite runs without network access. The agent, LLM, and embedding calls are mocked, so
@@ -340,11 +350,12 @@ python -m eval.run_eval                   # scores the agent against the public 
 python -m eval.generate_custom_questions  # writes eval/custom_questions.json, an extra SQL stress set
 ```
 
-`run_eval` uses two scorers, matching the `evaluation` field in the public answer key: a
+`run_eval` uses three scorers, matching the `evaluation` field in the public answer key: a
 fuzzy numeric match for figures (extract the number from the answer and compare it to the
-gold value within a tolerance) and an LLM judge for narrative answers.
-`generate_custom_questions` builds extra questions whose gold answers come straight from the
-database, so they are exact by construction and need no manual labeling.
+gold value within a tolerance), an exact entity match for "which company" questions, and an
+LLM judge for narrative answers. `generate_custom_questions` builds extra questions whose
+gold answers come straight from the database, so they are exact by construction and need no
+manual labeling.
 
 ## Deliverables
 
