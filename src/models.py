@@ -21,12 +21,12 @@ class SQLEvidence(BaseModel):
 class PDFEvidence(BaseModel):
     source: Literal["pdf"] = "pdf"
     company_ticker: str
-    chunk_id: int 
+    chunk_id: str 
     fiscal_year: int 
     page_number: int 
     section: str | None = None # Optional Field 
     text: str 
-    score: float 
+    score: float | None = None # Optional Field
 
 Evidence = Annotated[SQLEvidence | PDFEvidence, Field(discriminator="source")]
 
