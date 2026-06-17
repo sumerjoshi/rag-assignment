@@ -1,0 +1,266 @@
+[
+  {
+    "id": "custom_001",
+    "question": "What was Apple's total revenue in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$383,285,000,000",
+    "gold_answer_numeric": 383285000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_002",
+    "question": "What was Apple's total revenue in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$391,035,000,000",
+    "gold_answer_numeric": 391035000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_003",
+    "question": "What was Apple's total revenue in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$416,161,000,000",
+    "gold_answer_numeric": 416161000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_004",
+    "question": "What was Apple's net income in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$96,995,000,000",
+    "gold_answer_numeric": 96995000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_005",
+    "question": "What was Apple's net income in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$93,736,000,000",
+    "gold_answer_numeric": 93736000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_006",
+    "question": "What was Apple's net income in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$112,010,000,000",
+    "gold_answer_numeric": 112010000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_007",
+    "question": "What was Apple's gross profit in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$169,148,000,000",
+    "gold_answer_numeric": 169148000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_008",
+    "question": "What was Apple's gross profit in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$180,683,000,000",
+    "gold_answer_numeric": 180683000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_009",
+    "question": "What was Apple's gross profit in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$195,201,000,000",
+    "gold_answer_numeric": 195201000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_010",
+    "question": "What was Microsoft's total revenue in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$211,915,000,000",
+    "gold_answer_numeric": 211915000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_011",
+    "question": "What was Microsoft's total revenue in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$245,122,000,000",
+    "gold_answer_numeric": 245122000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_012",
+    "question": "What was Microsoft's total revenue in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$281,724,000,000",
+    "gold_answer_numeric": 281724000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_013",
+    "question": "What was Microsoft's net income in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$72,361,000,000",
+    "gold_answer_numeric": 72361000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_014",
+    "question": "What was Microsoft's net income in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$88,136,000,000",
+    "gold_answer_numeric": 88136000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_015",
+    "question": "What was Microsoft's net income in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$101,832,000,000",
+    "gold_answer_numeric": 101832000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_016",
+    "question": "What was Microsoft's gross profit in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$146,052,000,000",
+    "gold_answer_numeric": 146052000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_017",
+    "question": "What was Microsoft's gross profit in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$171,008,000,000",
+    "gold_answer_numeric": 171008000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_018",
+    "question": "What was Microsoft's gross profit in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$193,893,000,000",
+    "gold_answer_numeric": 193893000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_019",
+    "question": "What was Alphabet's total revenue in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$307,394,000,000",
+    "gold_answer_numeric": 307394000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_020",
+    "question": "What was Alphabet's total revenue in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$350,018,000,000",
+    "gold_answer_numeric": 350018000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_021",
+    "question": "What was Alphabet's total revenue in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$402,836,000,000",
+    "gold_answer_numeric": 402836000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_022",
+    "question": "What was Alphabet's net income in fiscal year 2023?",
+    "tier": 1,
+    "gold_answer": "$73,795,000,000",
+    "gold_answer_numeric": 73795000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_023",
+    "question": "What was Alphabet's net income in fiscal year 2024?",
+    "tier": 1,
+    "gold_answer": "$100,118,000,000",
+    "gold_answer_numeric": 100118000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  },
+  {
+    "id": "custom_024",
+    "question": "What was Alphabet's net income in fiscal year 2025?",
+    "tier": 1,
+    "gold_answer": "$132,170,000,000",
+    "gold_answer_numeric": 132170000000,
+    "required_modalities": [
+      "sql"
+    ],
+    "evaluation": "fuzzy_numeric"
+  }
+]

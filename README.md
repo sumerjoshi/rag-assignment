@@ -159,3 +159,195 @@ We will review your submission using:
 - how thoughtfully you evaluate your system against the public dev set
 - the clarity of your report and trade-off discussion
 - an internal held-out evaluation set
+
+---
+
+# Solution
+
+Everything above this line is the original take-home brief. Everything below is my
+implementation: what it is, how to set it up, and how to run it.
+
+The system is a local agentic RAG app over the provided data. A single LLM agent answers
+questions about Apple, Microsoft, and Alphabet by routing to two tools: a text-to-SQL
+engine over `financials.db` for exact numbers, and vector search over the 10-K filings for
+narrative context. It can use either tool or both, and every answer comes back with the
+evidence that supports it.
+
+## How it works
+
+For a single question:
+
+1. The request reaches the agent (directly, through the HTTP API, or through the UI).
+2. The agent (LlamaIndex `FunctionAgent`) decides which tool(s) to call based on the question.
+   - `query_financials` runs text-to-SQL against the SQLite database and returns rows.
+   - `search_filings` runs vector search over the embedded 10-K chunks and returns passages.
+3. Each tool call records structured evidence (the SQL query and rows, or the PDF passages
+   with company, fiscal year, page, and similarity score).
+4. The agent writes a final answer grounded in the tool outputs and returns an
+   `AgentResponse` with the answer, the sources it used, and the evidence list.
+
+Numeric and structured questions go to SQL, narrative questions go to the filings, and
+multi-step questions (for example "how did revenue change and why") use both.
+
+## Repository layout
+
+The code I added lives under `src/`, `eval/`, and `tests/`:
+
+```
+src/
+  config.py              env loading, Fireworks LLM/embedding clients, resolved paths
+  models.py              Pydantic models (SQLEvidence, PDFEvidence, AgentResponse)
+  retrieval/sql.py       text-to-SQL engine, schema context string, SQL evidence
+  retrieval/pdf.py       vector index load (lazy build), PDF retrieval, PDF evidence
+  ingest/build_index.py  PDF to chunks to embeddings to persisted vector store
+  agent/agent.py         the routing agent and the answer() entry point
+  api/backend.py         FastAPI app exposing POST /api/chat
+  ui/ui.py               Streamlit interface
+eval/
+  generate_dev_answers.py       produces dev_answers.json
+  run_eval.py                   scores the agent against the public answer key
+  generate_custom_questions.py  generates an extra SQL stress set from the database
+scripts/build_index.sh          interactive wrapper around the ingestion step
+tests/                          test suite (pytest), mypy-clean
+```
+
+## Prerequisites
+
+- Python 3.13
+- `uv`, used by `setup.sh` (https://github.com/astral-sh/uv)
+- A Fireworks API key
+
+## Setup
+
+1. Run the bootstrap script. It creates a `.venv`, installs `src/requirements.txt`, and
+   builds `data/financials.db` and the six PDFs if they are missing.
+
+```bash
+./setup.sh
+source .venv/bin/activate
+```
+
+2. Create your environment file and set your Fireworks key.
+
+```bash
+cp .env.example .env
+# open .env and set FIREWORKS_API_KEY to your real key
+```
+
+### How environment loading works
+
+`src/config.py` calls `load_dotenv()` (from `python-dotenv`) when it is imported, which
+reads `.env` into the process environment. Two things worth knowing:
+
+- The Fireworks values are validated lazily, at the point where the LLM or embedding client
+  is actually built, not at import time. Importing a module or running path-only code does
+  not require a key, so the test suite and tooling run without one.
+- The path values have sensible defaults relative to the repo root, so they are optional.
+  Set them only if you want to override the defaults.
+
+`.env` is gitignored, so real keys are never committed.
+
+### Environment variables
+
+| Variable | Required | Default | Purpose |
+|---|---|---|---|
+| `FIREWORKS_API_KEY` | yes | none | Fireworks API key |
+| `FIREWORKS_BASE_URL` | yes | set in `.env.example` | OpenAI-compatible Fireworks base URL |
+| `FIREWORKS_LLM_MODEL` | yes | set in `.env.example` | agent and text-to-SQL model |
+| `FIREWORKS_EMBEDDING_MODEL` | yes | set in `.env.example` | embedding model for the PDF index. Must match at build and query time |
+| `FIREWORKS_RERANK_MODEL` | no | set in `.env.example` | reserved for a future reranker, not used yet |
+| `DATABASE_PATH` | no | `data/financials.db` | SQLite database path |
+| `PDF_DIR` | no | `data/pdfs` | folder of 10-K PDFs |
+| `VECTOR_STORE_DIR` | no | `storage` | where the embedded index is persisted |
+| `API_HOST`, `API_PORT` | no | `0.0.0.0`, `8000` | present for reference. The server listens on `localhost:8000` to match the required API URL |
+
+## Build the vector store
+
+`setup.sh` does not build the PDF index, because that step calls the Fireworks embedding
+API. Build it once with either command:
+
+```bash
+./scripts/build_index.sh            # interactive, prompts before building
+python -m src.ingest.build_index    # direct, pass --force to rebuild from scratch
+```
+
+This reads the PDFs, splits them into chunks, embeds them with the Fireworks embedding
+model, and persists the index to `storage/`. If you skip this step the index builds
+automatically the first time you ask a question, so the first request is just slower.
+
+## Run the system
+
+Activate the venv first (`source .venv/bin/activate`), then start either entry point.
+
+### HTTP API
+
+```bash
+python -m src.api.backend
+```
+
+This serves `POST http://localhost:8000/api/chat`. It accepts `{"question": "..."}` and
+returns the answer plus its evidence:
+
+```bash
+curl -s -X POST http://localhost:8000/api/chat \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What was Apple total revenue in fiscal year 2025?"}'
+```
+
+Response shape:
+
+```json
+{
+  "answer": "Apple's total revenue for fiscal year 2025 was $416.161 billion.",
+  "sources_used": ["sql"],
+  "evidence": [
+    {
+      "source": "sql",
+      "query": "SELECT revenue FROM income_statements WHERE company_ticker = 'AAPL' AND fiscal_year = 2025",
+      "rows": [{"revenue": 416161000000}]
+    }
+  ]
+}
+```
+
+### Interactive UI
+
+```bash
+streamlit run src/ui/ui.py
+```
+
+This opens a local Streamlit app (default `http://localhost:8501`) with a query box. It
+shows the answer, which sources were used, and an expandable evidence panel with the SQL
+rows and the PDF passages.
+
+## Tests
+
+```bash
+pytest -v tests/
+mypy src tests
+```
+
+The suite runs without network access. The agent, LLM, and embedding calls are mocked, so
+it is fast and deterministic. It covers config and path handling, the Pydantic models, the
+SQL and PDF evidence mapping, ingestion, agent routing and evidence collection, the API
+contract, and the eval scoring logic.
+
+## Evaluation
+
+```bash
+python -m eval.generate_dev_answers       # writes dev_answers.json (the required deliverable)
+python -m eval.run_eval                   # scores the agent against the public answer key
+python -m eval.generate_custom_questions  # writes eval/custom_questions.json, an extra SQL stress set
+```
+
+`run_eval` uses two scorers, matching the `evaluation` field in the public answer key: a
+fuzzy numeric match for figures (extract the number from the answer and compare it to the
+gold value within a tolerance) and an LLM judge for narrative answers.
+`generate_custom_questions` builds extra questions whose gold answers come straight from the
+database, so they are exact by construction and need no manual labeling.
+
+## Deliverables
+
+- `dev_answers.json` at the repo root: my answers to the 10 development questions.
+- The short report covering design, retrieval, evaluation, trade-offs, and AI assistance is
+  in `REPORT.pdf`.
