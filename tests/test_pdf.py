@@ -1,4 +1,5 @@
 import types
+from typing import Any
 
 import pytest
 from llama_index.core.schema import NodeWithScore, TextNode
@@ -64,3 +65,38 @@ def test_get_index_loads_once_and_caches(monkeypatch: pytest.MonkeyPatch) -> Non
     second = pdf_module._get_index()
     assert first is second
     assert events.count("load") == 1
+
+
+def test_query_pdf_returns_answer_and_evidence(monkeypatch: pytest.MonkeyPatch) -> None:
+    # mock the whole index -> query engine -> response chain so no index load or network
+    node = NodeWithScore(
+        node=TextNode(
+            text="supply chain risk text",
+            metadata={"company_ticker": "AAPL", "fiscal_year": 2025, "page_number": 7},
+            id_="n1",
+        ),
+        score=0.8,
+    )
+
+    class _FakeResponse:
+        source_nodes = [node]
+
+        def __str__(self) -> str:
+            return "synthesized pdf answer"
+
+    class _FakeEngine:
+        def query(self, question: str) -> _FakeResponse:
+            return _FakeResponse()
+
+    class _FakeIndex:
+        def as_query_engine(self, **kwargs: Any) -> _FakeEngine:
+            return _FakeEngine()
+
+    monkeypatch.setattr(pdf_module, "_get_index", lambda: _FakeIndex())
+
+    answer, evidence = pdf_module.query_pdf("apple supply chain risks")
+    assert answer == "synthesized pdf answer"
+    assert len(evidence) == 1
+    assert evidence[0].company_ticker == "AAPL"
+    assert evidence[0].page_number == 7
+    assert evidence[0].score == 0.8
