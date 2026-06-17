@@ -70,6 +70,14 @@ def build_sql_query_engine() -> NLSQLTableQueryEngine:
 # the engine returns rows as tuples plus the column names, zip them into dicts for SQLEvidence
 def convert_to_sql_evidence(metadata: dict[str, Any]) -> SQLEvidence:
     col_keys = metadata.get("col_keys") or []
-    rows = [dict(zip(col_keys, row)) for row in metadata.get("result") or []]
+    rows: list[dict] = []
+    for raw in metadata.get("result") or []:
+        row = tuple(raw)
+        if len(col_keys) == len(row):
+            rows.append(dict(zip(col_keys, row)))
+        else:
+            # col_keys can come back empty for some queries; fall back to positional
+            # names so the data still renders instead of becoming empty dicts
+            rows.append({f"col_{i}": value for i, value in enumerate(row)})
     return SQLEvidence(query=metadata.get("sql_query", ""), rows=rows)
 

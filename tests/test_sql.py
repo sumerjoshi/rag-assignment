@@ -54,3 +54,9 @@ def test_convert_to_sql_evidence_handles_empty_result() -> None:
     # a query with no rows should give empty evidence, not crash
     ev = convert_to_sql_evidence({"sql_query": "SELECT 1 WHERE 0", "result": [], "col_keys": []})
     assert ev.rows == []
+
+
+def test_convert_to_sql_evidence_falls_back_when_col_keys_missing() -> None:
+    # missing col_keys must not produce empty dicts (would render as a columnless table)
+    ev = convert_to_sql_evidence({"sql_query": "SELECT ...", "result": [(2025, 416161000000)], "col_keys": []})
+    assert ev.rows == [{"col_0": 2025, "col_1": 416161000000}]

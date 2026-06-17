@@ -7,12 +7,15 @@ requests
 playwright
 llama-index
 llama-index-llms-fireworks
+sqlalchemy
 llama-index-llms-openai-like
 llama-index-embeddings-openai-like
 pydantic
 python-dotenv
 fastapi
 uvicorn
+streamlit
 pytest
+httpx
 mypy
 
