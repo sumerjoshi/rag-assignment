@@ -27,6 +27,7 @@ _REPO_ROOT = Path(__file__).resolve().parents[1]
 ABSOLUTE_DB_PATH = (_REPO_ROOT / DATABASE_PATH).resolve()
 ABSOLUTE_PDF_DIR_PATH = (_REPO_ROOT / PDF_DIR).resolve()
 ABSOLUTE_DATA_DIR_PATH = (_REPO_ROOT / DATA_DIR).resolve()
+ABSOLUTE_VECTOR_STORE_PATH = (_REPO_ROOT / VECTOR_STORE_DIR).resolve()
 
 def get_llm() -> OpenAILike:
     """

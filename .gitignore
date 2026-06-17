@@ -94,3 +94,7 @@ data/financials.db
 # Uncomment if you also want to keep the large PDFs out of git
 # (they can be re-rendered with ./setup.sh):
 # data/pdfs/
+
+# ---- Vector store (regenerable via src/ingest/build_index.py) ----
+# Embedded index is rebuilt from data/pdfs/ — do not commit:
+storage/
