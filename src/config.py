@@ -19,12 +19,14 @@ def _require(name: str) -> str:
 # importing this module should never crash just because the env is incomplete.
 DATABASE_PATH = os.getenv("DATABASE_PATH", "data/financials.db")
 PDF_DIR = os.getenv("PDF_DIR", "data/pdfs")
+DATA_DIR = os.getenv("DATA_DIR", "data/")
 VECTOR_STORE_DIR = os.getenv("VECTOR_STORE_DIR", "storage")
 
 # Set the _REPO_ROOT and other variables coming from SRC
 _REPO_ROOT = Path(__file__).resolve().parents[1]
 ABSOLUTE_DB_PATH = (_REPO_ROOT / DATABASE_PATH).resolve()
 ABSOLUTE_PDF_DIR_PATH = (_REPO_ROOT / PDF_DIR).resolve()
+ABSOLUTE_DATA_DIR_PATH = (_REPO_ROOT / DATA_DIR).resolve()
 
 def get_llm() -> OpenAILike:
     """
