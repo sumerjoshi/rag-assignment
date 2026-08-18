@@ -1,8 +1,8 @@
-# Fireworks AI AMLE Take-Home: Agentic RAG for 10-K Analysis
+## Agentic RAG for 10-K Analysis
 
-This take-home is meant to mirror part of the Applied Machine Learning Engineer role: supporting customers in their journey to build GenAI applications on Fireworks.
+This take-home is meant to mirror part of the Applied Machine Learning Engineer role: supporting customers in their journey to build GenAI applications on .
 
-In this exercise, you should approach the problem like a Fireworks engineer supporting a customer who needs an agentic RAG workflow over structured financial data and 10-K filings.
+In this exercise, you should approach the problem like a  engineer supporting a customer who needs an agentic RAG workflow over structured financial data and 10-K filings.
 
 ## What We're Looking For
 
@@ -15,10 +15,10 @@ In this exercise, you should approach the problem like a Fireworks engineer supp
 ## Customer Scenario
 
 **From:** Natalie Brooks <natalie.brooks@acmecorp.example.com>  
-**To:** Solutions Team <solutions@fireworks.ai>  
+**To:** Solutions Team <solutions@.ai>  
 **Subject:** Help Needed: Local Research Assistant for 10-K Analysis
 
-Hi Fireworks team,
+Hi  team,
 
 Our research team spends a lot of time reading annual reports, cross-checking management commentary against financial tables, and building simple comparisons across companies. We have a local dataset that combines structured financial data with the original 10-K filings, and we want a local AI assistant that can help analysts answer increasingly complex questions over that material.
 
@@ -60,7 +60,7 @@ Director of Research Systems, Acme Corp
 
 If `data/financials.db` and the 10-K PDFs are already present, `setup.sh` will reuse them. It only fetches SEC data if it needs to rebuild missing assets.
 
-The dev-set answer key is public so you can evaluate your system locally. We intentionally do not provide an evaluation harness; part of the assignment is deciding how to measure correctness against the provided questions, answers, and data. Fireworks keeps a separate held-out set for the hidden final evaluation.
+The dev-set answer key is public so you can evaluate your system locally. We intentionally do not provide an evaluation harness; part of the assignment is deciding how to measure correctness against the provided questions, answers, and data.  keeps a separate held-out set for the hidden final evaluation.
 
 ## Data Overview
 
@@ -90,7 +90,7 @@ Your system should:
 ## Submission Guidelines
 
 - Submit within the deadline provided by your recruiter.
-- You may use any Fireworks model and additional framework, database, or vector store.
+- You may use any  model and additional framework, database, or vector store.
 - You may use the internet, documentation, third-party packages, and AI coding tools.
 - If you use AI assistance, mention how in your report.
 - Keep external API usage to a reasonable prototype budget.
@@ -195,7 +195,7 @@ The code I added lives under `src/`, `eval/`, and `tests/`:
 
 ```
 src/
-  config.py              env loading, Fireworks LLM/embedding clients, resolved paths
+  config.py              env loading,  LLM/embedding clients, resolved paths
   models.py              Pydantic models (SQLEvidence, PDFEvidence, AgentResponse)
   retrieval/sql.py       text-to-SQL engine, schema context string, SQL evidence
   retrieval/pdf.py       vector index load (lazy build), PDF retrieval, PDF evidence
@@ -215,7 +215,7 @@ tests/                          test suite (pytest), mypy-clean
 
 - Python 3.13
 - `uv`, used by `setup.sh` (https://github.com/astral-sh/uv)
-- A Fireworks API key
+- A  API key
 
 ## Setup
 
@@ -237,11 +237,11 @@ source .venv/bin/activate
 uv pip install -r src/requirements.txt
 ```
 
-2. Create your environment file and set your Fireworks key.
+2. Create your environment file and set your  key.
 
 ```bash
 cp .env.example .env
-# open .env and set FIREWORKS_API_KEY to your real key
+# open .env and set _API_KEY to your real key
 ```
 
 ### How environment loading works
@@ -249,7 +249,7 @@ cp .env.example .env
 `src/config.py` calls `load_dotenv()` (from `python-dotenv`) when it is imported, which
 reads `.env` into the process environment. Two things worth knowing:
 
-- The Fireworks values are validated lazily, at the point where the LLM or embedding client
+- The  values are validated lazily, at the point where the LLM or embedding client
   is actually built, not at import time. Importing a module or running path-only code does
   not require a key, so the test suite and tooling run without one.
 - The path values have sensible defaults relative to the repo root, so they are optional.
@@ -261,11 +261,11 @@ reads `.env` into the process environment. Two things worth knowing:
 
 | Variable | Required | Default | Purpose |
 |---|---|---|---|
-| `FIREWORKS_API_KEY` | yes | none | Fireworks API key |
-| `FIREWORKS_BASE_URL` | yes | set in `.env.example` | OpenAI-compatible Fireworks base URL |
-| `FIREWORKS_LLM_MODEL` | yes | set in `.env.example` | agent and text-to-SQL model |
-| `FIREWORKS_EMBEDDING_MODEL` | yes | set in `.env.example` | embedding model for the PDF index. Must match at build and query time |
-| `FIREWORKS_RERANK_MODEL` | no | set in `.env.example` | reserved for a future reranker, not used yet |
+| `_API_KEY` | yes | none |  API key |
+| `_BASE_URL` | yes | set in `.env.example` | OpenAI-compatible  base URL |
+| `_LLM_MODEL` | yes | set in `.env.example` | agent and text-to-SQL model |
+| `_EMBEDDING_MODEL` | yes | set in `.env.example` | embedding model for the PDF index. Must match at build and query time |
+| `_RERANK_MODEL` | no | set in `.env.example` | reserved for a future reranker, not used yet |
 | `DATABASE_PATH` | no | `data/financials.db` | SQLite database path |
 | `PDF_DIR` | no | `data/pdfs` | folder of 10-K PDFs |
 | `VECTOR_STORE_DIR` | no | `storage` | where the embedded index is persisted |
@@ -273,7 +273,7 @@ reads `.env` into the process environment. Two things worth knowing:
 
 ## Build the vector store
 
-`setup.sh` does not build the PDF index, because that step calls the Fireworks embedding
+`setup.sh` does not build the PDF index, because that step calls the  embedding
 API. Build it once with either command:
 
 ```bash
@@ -281,7 +281,7 @@ API. Build it once with either command:
 python -m src.ingest.build_index    # direct, pass --force to rebuild from scratch
 ```
 
-This reads the PDFs, splits them into chunks, embeds them with the Fireworks embedding
+This reads the PDFs, splits them into chunks, embeds them with the  embedding
 model, and persists the index to `storage/`. If you skip this step the index builds
 automatically the first time you ask a question, so the first request is just slower.
 
